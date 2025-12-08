@@ -1,11 +1,340 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Bootstrap demo</title>
+    <meta charset="UTF-8">
+    <title>Love Cipher</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        /* Тёмный digital-фон */
+        body {
+            min-height: 200vh;
+            background: radial-gradient(circle at top, #0a0f1f, #020409);
+            font-family: system-ui, sans-serif;
+            color: #ffffff;
+        }
+
+        .main-wrapper {
+            min-height: 200vh;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Стеклянный блок */
+        .glass {
+            background: rgba(255,255,255,0.07);
+            border-radius: 20px;
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(255,255,255,0.25);
+            box-shadow:
+                    inset 0 0 20px rgba(0,200,255,0.07),
+                    0 0 40px rgba(0,160,255,0.18);
+        }
+
+        /* Общие textarea */
+        textarea {
+            background: rgba(255,255,255,0.05) !important;
+            border-radius: 14px;
+            border: 1px solid rgba(0,200,255,0.35) !important;
+            color: #ffffff !important;
+            resize: none;
+            min-height: clamp(300px, 40vh, 520px);
+            box-shadow:
+                    inset 0 0 12px rgba(0,200,255,0.1),
+                    0 0 14px rgba(0,200,255,0.1);
+            transition: all .25s ease;
+        }
+
+        textarea::placeholder {
+            color: rgba(255,255,255,0.4);
+        }
+
+        textarea:focus {
+            outline: none;
+            background: rgba(255,255,255,0.08) !important;
+            border: 1px solid #00ccff !important;
+            box-shadow:
+                    inset 0 0 18px rgba(0,220,255,0.2),
+                    0 0 24px rgba(0,220,255,0.5);
+        }
+
+        /* Хакерский зелёный только для бинарного инпута */
+        #binaryInput {
+            color: #00ff66 !important;
+            caret-color: #00ff66;
+            text-shadow: 0 0 6px rgba(0,255,100,0.6);
+            font-family: "Courier New", monospace;
+        }
+
+        /* Кнопка */
+        .btn-glass {
+            background: linear-gradient(135deg, #00ccff, #0077ff);
+            border: none;
+            color: #fff;
+            border-radius: 14px;
+            box-shadow:
+                    0 0 18px rgba(0,200,255,0.6),
+                    inset 0 0 12px rgba(255,255,255,0.2);
+            transition: 0.25s ease;
+        }
+
+        .btn-glass:hover {
+            box-shadow:
+                    0 0 28px rgba(0,220,255,0.85),
+                    inset 0 0 16px rgba(255,255,255,0.25);
+        }
+
+        .btn-glass:active {
+            transform: scale(0.96);
+            box-shadow:
+                    0 0 14px rgba(0,220,255,0.4),
+                    inset 0 0 18px rgba(0,0,0,0.3);
+        }
+
+        .label-title {
+            font-weight: 500;
+            letter-spacing: 1px;
+            color: #bcdcff;
+        }
+
+        /* Canvas для конфетти */
+        #confetti {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            pointer-events: none;
+        }
+
+        #binaryInput,
+        #textOutput {
+            height: 45vh;      /* 55% высоты экрана */
+        }
+    </style>
 </head>
+
 <body>
-<h1>Hello, world!</h1>
+
+<div class="container main-wrapper">
+    <div class="w-100 glass p-4">
+        <h2 class="text-center mb-4">💜 Decode Me</h2>
+
+        <div class="row g-4 align-items-stretch">
+            <!-- INPUT -->
+            <div class="col-12 col-md-5">
+                <div class="label-title mb-2">INPUT</div>
+                <textarea id="binaryInput" class="form-control"
+                          placeholder="your text..">11010000 10011100 11010000 10111110 11010000 10111001 00100000
+11010000 10111011 11010001 10001110 11010000 10110001 11010000 10111000 11010000 10111100 11010001 10001011 11010000 10111001 00101100
+00001010
+11010001 10000001 11010000 10110101 11010000 10110011 11010000 10111110 11010000 10111101 11010001 10001111 00100000
+11010001 10001111 00100000
+11010000 10111111 11010001 10000000 11010000 10111110 11010001 10000001 11010001 10000010 11010000 10111110 00100000
+11010001 10000101 11010000 10111110 11010001 10000111 11010001 10000011 00100000
+11010001 10000001 11010000 10111010 11010000 10110000 11010000 10110111 11010000 10110000 11010001 10000010 11010001 10001100
+00100000
+11010001 10000010 11010000 10110101 11010000 10110001 11010000 10110101
+00001010
+
+11010000 10010010 00100000
+11010001 10000010 11010000 10110010 11010000 10111110 11010000 10111000 11010001 10000101 00100000
+11010000 10111101 11010001 10000011 11010000 10111010 11010000 10110011 11010001 10000010 11010000 10110000 11010001 10000101 00100000
+11010001 10000001 11010001 10000010 11010000 10101110 11010000 10111011 11010001 10000010 11010000 10111100 00100000
+11010000 10111000 11010000 10110100 11010000 10110101 11010000 10111001 00101100
+00001010
+11010000 10110010 00100000
+11010001 10000000 11010001 10000101 00100000
+11010000 10111101 11010001 10000011 11010000 10111010 11010000 10111011 11010000 10111000 11010000 10110100 11010000 10111001 00100000
+11010001 10000001 11010000 10111011 11010000 10111010 11010001 10000010 11010000 10110111 11010001 10000011 11010000 10110011 11010000 10111000 00101100
+00001010
+
+11010001 10001111 00100000
+11010000 10111000 11010001 10000001 11010000 10111010 11010001 10000000 11010000 10110101 11010000 10111101 11010000 10111110 00100000
+11010001 10000011 11010000 10110101 11010001 10000010 11010001 10000000 11010000 10110101 11010000 10111101 11010000 10110000 00111010
+00001010
+11010000 10110010 11010001 10000001 11010000 10110101 00100000
+11010001 10000010 11010000 10110010 11010000 10111110 11010000 10111000 00100000
+11010000 10111100 11010000 10110101 11010001 10000111 11010001 10000010 11010001 10001011 00100000
+11010000 10111110 11010000 10110001 11010001 10001111 11010000 10111001 11010001 10000010 11010000 10110101 11010000 10111011 11010001 10001100 11010000 10111101 11010000 10111110 11010001 10000001 11010001 10000010 11010001 10001110 00100000
+11010001 10000001 11010001 10000010 11010000 10110000 11010000 10111101 11010001 10000011 11010001 10000010 11010001 10000010 11010000 10111011 11010001 10000011 11010001 10000111 11010000 10111000 00101110
+00001010
+
+11010001 10000010 11010000 10110010 11010000 10111010 11010000 10111010 00100000
+11010001 10001101 11010001 10000010 11010000 10111110 00100000
+01001101 01110101 01110011 01110100 01100001 01101110 01100111 00100000
+11010001 10000001 11010001 10000010 11010000 10110000 11010001 10000010 11010000 10111101 11010001 10000010 00100000
+11010001 10001101 11010001 10000010 11010001 10000010 11010000 10111100 00100000
+11010000 10111101 11010000 10110101 00100000
+11010000 10111111 11010001 10000000 11010000 10111110 11010001 10000001 11010001 10000010 11010000 10111110 00100000
+11010000 10111100 11010000 10110101 11010001 10000111 11010001 10000010 11010000 10111110 11010000 10111001 00101100
+00001010
+
+11010000 10110000 00100000
+11010001 10000001 11010000 10111000 11010000 10111100 11010000 10110010 11010000 10111011 11010000 10110010 11010001 10000010 00100000
+11010001 10000010 11010000 10111110 11010000 10110011 11010000 10111110 00101100 00100000
+11010000 10110111 11010000 10111110 00100000
+11010000 10111110 00100000
+11010001 10001110 11010000 10111100 11010000 10110000 11010000 10110111 11010000 10111101 11010000 10111000 11010000 10111011 00101110
+00001010
+
+11010000 10011111 11010001 10000011 11010001 10000011 11010001 10000010 11010000 10111000 00100000
+11010001 10000010 11010000 10111010 11010000 10111011 11010000 10111001 00100000
+11010001 10000000 11010000 10110000 11010000 10110100 11010000 10111000 11010001 10000011 00100000
+11010000 10111111 11010000 10111110 11010000 10110001 11010000 10110101 11010000 10110100 00101100
+00001010
+11010001 10000011 11010000 10111100 11010000 10110101 11010001 10000010 11010001 10000010 11010001 10000010 11010000 10110101 11010000 10110001 00100000
+11010001 10000010 11010000 10110010 11010000 10111110 11010000 10111001
+00001010
+11010001 10001010
+</textarea>
+            </div>
+
+            <!-- BUTTON -->
+            <div class="col-12 col-md-2 d-flex flex-column justify-content-center">
+                <button id="decodeBtn"
+                        class="btn btn-glass w-100 mb-3 py-3 fw-bold">
+                    Decode
+                </button>
+                <div id="error" class="text-danger text-center small"></div>
+            </div>
+
+            <!-- OUTPUT -->
+            <div class="col-12 col-md-5">
+                <div class="label-title mb-2">OUTPUT</div>
+                <textarea id="textOutput"
+                          class="form-control"
+                          readonly
+                          placeholder="Result here..."></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Canvas для конфетти -->
+<canvas id="confetti"></canvas>
+
+<script>
+    // ===== ДЕКОДЕР БИНАРНОГО КОДА =====
+    function decodeBinary(binary) {
+        // Убираем всё, кроме 0 и 1
+        const clean = binary.replace(/[^01]/g, "");
+
+        if (!clean.length) {
+            throw new Error("Введите двоичный код");
+        }
+
+        if (clean.length % 8 !== 0) {
+            throw new Error("Количество бит должно делиться на 8");
+        }
+
+        const bytes = [];
+
+        // Каждые 8 бит переводим в байт (0–255)
+        for (let i = 0; i < clean.length; i += 8) {
+            const byteStr = clean.slice(i, i + 8);
+            const byte = parseInt(byteStr, 2);
+
+            if (isNaN(byte)) {
+                throw new Error("Ошибка байта: " + byteStr);
+            }
+
+            bytes.push(byte);
+        }
+
+        // Правильное декодирование UTF-8
+        const decoder = new TextDecoder("utf-8");
+        return decoder.decode(new Uint8Array(bytes));
+    }
+
+
+    const input  = document.getElementById("binaryInput");
+    const output = document.getElementById("textOutput");
+    const btn    = document.getElementById("decodeBtn");
+    const error  = document.getElementById("error");
+
+    btn.addEventListener("click", () => {
+        error.textContent = "";
+        output.value = "";
+
+        try {
+            const decoded = decodeBinary(input.value);
+            output.value = decoded;
+
+            // Запускаем конфетти только при успехе
+            launchConfetti();
+        } catch (e) {
+            error.textContent = e.message;
+        }
+    });
+
+    // ===== CONFETTI EFFECT =====
+
+    const canvas = document.getElementById("confetti");
+    const ctx = canvas.getContext("2d");
+
+    // ВАЖНО: var, а не let — и объявлен сразу
+    var confetti = [];
+
+    function resizeCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function createConfetti() {
+        confetti = [];
+        const colors = ["#00ff66", "#00ccff", "#ff66cc", "#ffffff"];
+
+        for (let i = 0; i < 180; i++) {
+            confetti.push({
+                x: Math.random() * canvas.width,
+                y: -20,
+                r: Math.random() * 6 + 2,
+                vy: Math.random() * 3 + 2,
+                vx: (Math.random() - 0.5) * 2,
+                color: colors[Math.floor(Math.random() * colors.length)],
+                rot: Math.random() * 360,
+                vr: (Math.random() - 0.5) * 10
+            });
+        }
+    }
+
+    function drawConfetti() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        confetti.forEach(p => {
+            p.y += p.vy;
+            p.x += p.vx;
+            p.rot += p.vr;
+
+            ctx.save();
+            ctx.translate(p.x, p.y);
+            ctx.rotate(p.rot * Math.PI / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * 2);
+            ctx.restore();
+        });
+
+        confetti = confetti.filter(p => p.y < canvas.height + 40);
+    }
+
+    function animateConfetti() {
+        drawConfetti();
+        if (confetti.length) {
+            requestAnimationFrame(animateConfetti);
+        }
+    }
+
+    function launchConfetti() {
+        createConfetti();
+        animateConfetti();
+    }
+</script>
+
 </body>
 </html>
